@@ -1,3 +1,4 @@
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
@@ -17,16 +18,39 @@ public class Main {
         System.out.println("           INDICE INVERTIDO");
         System.out.println("========================================");
 
-        // TODO: ajustar o caminho da pasta com os arquivos de entrada.
-        File pastaArquivos = new File("entrada");
+        // Caminho da pasta com os arquivos de entrada.
+        // Pode ser passado como argumento: java Main caminho/da/pasta
+        File pastaArquivos;
+            if (args.length > 0) {
+                pastaArquivos = new File(args[0]);
+            } else {
+                pastaArquivos = new File("entrada");
+            }
+
+        if (!pastaArquivos.exists() || !pastaArquivos.isDirectory()) {
+            System.out.println("Pasta de arquivos não encontrada: " + pastaArquivos.getAbsolutePath());
+            System.out.println("Crie a pasta 'entrada' com arquivos .txt ou passe o caminho como argumento.");
+            return;
+        }
 
         ArvoreDigitalTernaria arvore = new ArvoreDigitalTernaria();
 
         System.out.println("Construindo indice...");
-        // TODO: chamar Indexador.construirIndice(pastaArquivos, arvore);
-        // TODO: registrar cada arquivo indexado em
-        // ProcessadorConsulta.registrarArquivo(nomeArquivo) (necessário
-        // para o operador NAO funcionar corretamente).
+        Indexador.construirIndice(pastaArquivos, arvore);
+
+        // Registra cada arquivo indexado no ProcessadorConsulta
+        // (necessário para o operador NAO calcular o complemento corretamente)
+        File[] arquivos = pastaArquivos.listFiles();
+        int qtd = 0;
+        if (arquivos != null) {
+            for (File arquivo : arquivos) {
+                if (arquivo.isFile() && arquivo.getName().endsWith(".txt")) {
+                    ProcessadorConsulta.registrarArquivo(arquivo.getName());
+                    qtd++;
+                }
+            }
+        }
+        System.out.println("Arquivos encontrados: " + qtd);
         System.out.println("Indice construido com sucesso.");
 
         Scanner scanner = new Scanner(System.in);
@@ -40,8 +64,11 @@ public class Main {
                 break;
             }
 
-            // TODO: Set<String> resultado = ProcessadorConsulta.processarConsulta(consulta, arvore);
-            Set<String> resultado = null;
+            if (consulta.trim().isEmpty()) {
+                continue;
+            }
+
+            Set<String> resultado = ProcessadorConsulta.processarConsulta(consulta, arvore);
             imprimirResultados(resultado);
         }
 
@@ -57,11 +84,12 @@ public class Main {
      */
     private static void imprimirResultados(Set<String> arquivos) {
         System.out.println();
-        // TODO:
-        // se arquivos for null ou vazio, imprimir algo como
-        // "Nenhum arquivo encontrado.";
-        // senão, imprimir "Arquivos encontrados:" seguido de um nome de
-        // arquivo por linha.
-        System.out.println("Arquivos encontrados:");
+        if (arquivos == null || arquivos.isEmpty()) {
+            System.out.println("Nenhum arquivo encontrado.");
+        } else {
+            System.out.println("Arquivos encontrados:");
+            // Ordena para saída previsível e organizada
+            arquivos.stream().sorted().forEach(System.out::println);
+        }
     }
 }
