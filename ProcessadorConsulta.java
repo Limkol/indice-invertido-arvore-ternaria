@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,8 +16,7 @@ import java.util.Set;
  *
  * Responsável: Pessoa 3
  */
-
-public class ProcessadorConsulta{
+public class ProcessadorConsulta {
 
     /* Conjunto com todos os nomes de arquivo já indexados (usado no NAO). */
     private static Set<String> universoDeArquivos = new HashSet<>();
@@ -44,9 +42,15 @@ public class ProcessadorConsulta{
      * @return conjunto de nomes de arquivo que atendem à consulta
      */
     public static Set<String> processarConsulta(String consulta, ArvoreDigitalTernaria arvore) {
+        if (consulta == null || consulta.trim().isEmpty()) {
+            return new HashSet<>();
+        }
         List<String> tokens = tokenizar(consulta);
+        if (tokens.isEmpty()) {
+            return new HashSet<>();
+        }
         int[] posicao = {0};
-        // TODO: OU tem a menor precedência, então ele "engloba" tudo.
+        // OU tem a menor precedência, então ele "engloba" tudo.
         return avaliarOU(tokens, posicao, arvore);
     }
 
@@ -57,9 +61,24 @@ public class ProcessadorConsulta{
      * @return lista de tokens, ex.: ["contrato", "E", "responsabilidade"]
      */
     private static List<String> tokenizar(String consulta) {
-        // TODO: usar consulta.trim().split("\\s+") e normalizar cada
-        // palavra (não normalizar os operadores E/OU/NAO).
-        return new ArrayList<>(Arrays.asList(consulta.trim().split("\\s+")));
+        List<String> tokens = new ArrayList<>();
+        String[] partes = consulta.trim().split("\\s+");
+        for (String parte : partes) {
+            if (parte.isEmpty()) {
+                continue;
+            }
+            String upper = parte.toUpperCase();
+            // Operadores ficam em maiúsculas; palavras são normalizadas
+            if (upper.equals("E") || upper.equals("OU") || upper.equals("NAO")) {
+                tokens.add(upper);
+            } else {
+                String normalizada = Normalizador.normalizar(parte);
+                if (!normalizada.isEmpty()) {
+                    tokens.add(normalizada);
+                }
+            }
+        }
+        return tokens;
     }
 
     /*
@@ -73,13 +92,14 @@ public class ProcessadorConsulta{
      * @return conjunto resultante da avaliação
      */
     private static Set<String> avaliarOU(List<String> tokens, int[] posicao, ArvoreDigitalTernaria arvore) {
-        // TODO:
-        // Set<String> resultado = avaliarE(tokens, posicao, arvore);
-        // enquanto houver token seguinte e ele for "OU":
-        //   avançar posicao[0] (pular o "OU")
-        //   resultado.addAll(avaliarE(tokens, posicao, arvore));
-        // retornar resultado;
-        return new HashSet<>();
+        Set<String> resultado = avaliarE(tokens, posicao, arvore);
+
+        while (posicao[0] < tokens.size() && tokens.get(posicao[0]).equals("OU")) {
+            posicao[0]++; // pular o "OU"
+            Set<String> direito = avaliarE(tokens, posicao, arvore);
+            resultado.addAll(direito); // união
+        }
+        return resultado;
     }
 
     /*
@@ -92,13 +112,14 @@ public class ProcessadorConsulta{
      * @return conjunto resultante da avaliação
      */
     private static Set<String> avaliarE(List<String> tokens, int[] posicao, ArvoreDigitalTernaria arvore) {
-        // TODO:
-        // Set<String> resultado = avaliarNao(tokens, posicao, arvore);
-        // enquanto houver token seguinte e ele for "E":
-        //   avançar posicao[0] (pular o "E")
-        //   resultado.retainAll(avaliarNao(tokens, posicao, arvore));
-        // retornar resultado;
-        return new HashSet<>();
+        Set<String> resultado = avaliarNao(tokens, posicao, arvore);
+
+        while (posicao[0] < tokens.size() && tokens.get(posicao[0]).equals("E")) {
+            posicao[0]++; // pular o "E"
+            Set<String> direito = avaliarNao(tokens, posicao, arvore);
+            resultado.retainAll(direito); // interseção
+        }
+        return resultado;
     }
 
     /*
@@ -111,15 +132,30 @@ public class ProcessadorConsulta{
      * @return conjunto resultante da avaliação
      */
     private static Set<String> avaliarNao(List<String> tokens, int[] posicao, ArvoreDigitalTernaria arvore) {
-        // TODO:
-        // se o token atual for "NAO":
-        //   avançar posicao[0] (pular o "NAO")
-        //   buscar a próxima palavra na árvore
-        //   retornar o COMPLEMENTO desse resultado em relação a universoDeArquivos
-        // senão:
-        //   buscar a palavra atual na árvore (arvore.buscar(palavra))
-        //   avançar posicao[0]
-        //   retornar o resultado como new HashSet<>(listaDeArquivos)
-        return new HashSet<>();
+        if (posicao[0] >= tokens.size()) {
+            return new HashSet<>();
+        }
+
+        String token = tokens.get(posicao[0]);
+
+        if (token.equals("NAO")) {
+            posicao[0]++; // pular o "NAO"
+            if (posicao[0] >= tokens.size()) {
+                return new HashSet<>();
+            }
+            String palavra = tokens.get(posicao[0]);
+            posicao[0]++; // pular a palavra
+
+            // Complemento: universo − arquivos que contêm a palavra
+            List<String> contemPalavra = arvore.buscar(palavra);
+            Set<String> complemento = new HashSet<>(universoDeArquivos);
+            complemento.removeAll(contemPalavra);
+            return complemento;
+        } else {
+            // Token é uma palavra simples
+            posicao[0]++; // pular a palavra
+            List<String> arquivos = arvore.buscar(token);
+            return new HashSet<>(arquivos);
+        }
     }
 }
