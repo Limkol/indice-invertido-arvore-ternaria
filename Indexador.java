@@ -3,9 +3,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
-/*
- * Responsável: Guilhermme Longo
- */
 public class Indexador {
     public static void construirIndice(File pastaArquivos, ArvoreDigitalTernaria arvore) throws IOException {
         File[] arquivos = pastaArquivos.listFiles();
@@ -24,6 +21,17 @@ public class Indexador {
 
         for (String palavra : palavras) {
             arvore.inserir(palavra, arquivo.getName());
+        }
+    }
+
+    public static void registrarArquivos(File pastaArquivos) {
+        File[] arquivos = pastaArquivos.listFiles();
+        if (arquivos != null) {
+            for (File arquivo : arquivos) {
+                if (arquivo.isFile() && arquivo.getName().endsWith(".txt")) {
+                    ProcessadorConsulta.registrarArquivo(arquivo.getName());
+                }
+            }
         }
     }
 }
