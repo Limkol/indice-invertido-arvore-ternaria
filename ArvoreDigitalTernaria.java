@@ -9,6 +9,9 @@ public class ArvoreDigitalTernaria {
         this.raiz = null;
     }
 
+    /*
+    * Insere uma palavra na árvore e associa o arquivo a ela.
+    */
     public void inserir(String palavra, String nomeArquivo) {
         if (palavra == null || palavra.isEmpty()) {
             return;
@@ -16,6 +19,11 @@ public class ArvoreDigitalTernaria {
         raiz = inserirRecursivo(raiz, palavra, 0, nomeArquivo);
     }
 
+    /*
+    * Insere recursivamente na árvore, navegando por esquerda/direita
+    * para encontrar o caractere correto, depois segue pelo meio
+    * para o próximo caractere da palavra.
+    */
     private No inserirRecursivo(No no, String palavra, int indice, String nomeArquivo) {
         char caractereAtual = palavra.charAt(indice);
         if (no == null) {
@@ -38,6 +46,9 @@ public class ArvoreDigitalTernaria {
         return no;
     }
 
+    /*
+    * Busca uma palavra na árvore e retorna lista de arquivos associados.
+    */
     public List<String> buscar(String palavra) {
         if (palavra == null || palavra.isEmpty()) {
             return new ArrayList<>();
@@ -51,6 +62,10 @@ public class ArvoreDigitalTernaria {
         return no.arquivosAssociados;
     }
 
+    /*
+    * Busca recursivamente o nó que representa o fim da palavra.
+    * Retorna null se a palavra não existir na árvore.
+    */
     private No buscarNo(No no, String palavra, int indice) {
         if (no == null) {
             return null;

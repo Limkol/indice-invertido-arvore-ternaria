@@ -6,6 +6,9 @@ import java.util.Set;
 
 public class Main {
 
+    /*
+    * Ponto de entrada do programa. Constrói o índice e abre loop de consultas.
+    */
     public static void main(String[] args) throws IOException {
         System.out.println("========================================");
         System.out.println("           INDICE INVERTIDO");
@@ -58,6 +61,9 @@ public class Main {
         scanner.close();
     }
 
+    /*
+    * Imprime os arquivos encontrados de forma organizada e ordenada.
+    */
     private static void imprimirResultados(Set<String> arquivos) {
         System.out.println();
         if (arquivos == null || arquivos.isEmpty()) {

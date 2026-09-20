@@ -10,6 +10,9 @@ public class No {
     boolean fimDaPalavra;
     List<String> arquivosAssociados;
 
+    /*
+    * Construtor do nó. Inicializa caractere e deixa ponteiros como null.
+    */
     public No(char caractere) {
         this.caractere = caractere;
         this.esquerda = null;

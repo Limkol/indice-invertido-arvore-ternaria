@@ -4,13 +4,19 @@ import java.util.List;
 import java.util.Set;
 
 public class ProcessadorConsulta {
-
     private static Set<String> universoDeArquivos = new HashSet<>();
 
+    /*
+    * Registra um arquivo no universo de arquivos indexados.
+    */
     public static void registrarArquivo(String nomeArquivo) {
         universoDeArquivos.add(nomeArquivo);
     }
 
+    /*
+    * Processa uma consulta com operadores E, OU e NAO.
+    * Respeita precedência: NAO > E > OU
+    */
     public static Set<String> processarConsulta(String consulta, ArvoreDigitalTernaria arvore) {
         if (consulta == null || consulta.trim().isEmpty()) {
             return new HashSet<>();
@@ -32,6 +38,10 @@ public class ProcessadorConsulta {
         return avaliarOU(tokens, posicao, arvore);
     }
 
+    /*
+    * Tokeniza a consulta em palavras e operadores.
+    * Normaliza palavras e valida operadores (E, OU, NAO).
+    */
     private static List<String> tokenizar(String consulta) {
         List<String> tokens = new ArrayList<>();
         String[] partes = consulta.trim().split("\\s+");
@@ -52,17 +62,25 @@ public class ProcessadorConsulta {
         return tokens;
     }
 
+    /*
+    * Avalia a precedência do operador OU (menor precedência).
+    * Combina resultados com união (addAll).
+    */
     private static Set<String> avaliarOU(List<String> tokens, int[] posicao, ArvoreDigitalTernaria arvore) {
         Set<String> resultado = avaliarE(tokens, posicao, arvore);
 
         while (posicao[0] < tokens.size() && tokens.get(posicao[0]).equals("OU")) {
             posicao[0]++;
             Set<String> direito = avaliarE(tokens, posicao, arvore);
-            resultado.addAll(direito); // união
+            resultado.addAll(direito);
         }
         return resultado;
     }
 
+    /*
+    * Avalia a precedência do operador E (precedência média).
+    * Combina resultados com interseção (retainAll).
+    */
     private static Set<String> avaliarE(List<String> tokens, int[] posicao, ArvoreDigitalTernaria arvore) {
         Set<String> resultado = avaliarNao(tokens, posicao, arvore);
 
@@ -74,6 +92,10 @@ public class ProcessadorConsulta {
         return resultado;
     }
 
+    /*
+    * Avalia a precedência do operador NAO (maior precedência).
+    * Retorna complemento: todos arquivos menos aqueles que contêm a palavra.
+    */
     private static Set<String> avaliarNao(List<String> tokens, int[] posicao, ArvoreDigitalTernaria arvore) {
         if (posicao[0] >= tokens.size()) {
             return new HashSet<>();
@@ -100,6 +122,10 @@ public class ProcessadorConsulta {
         }
     }
 
+    /*
+    * Valida se a consulta possui sintaxe correta.
+    * Rejeita operadores duplicados ou mal posicionados.
+    */
     private static boolean validarConsulta(String consulta) {
         String[] tokens = consulta.trim().split("\\s+");
         for (int i = 0; i < tokens.length; i++) {
