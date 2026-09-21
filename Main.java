@@ -1,3 +1,9 @@
+// Projeto: Busca de palavras em textos
+// Disciplina: Estrutura de Dados II
+// Alunos
+// Nome: Gustavo Francisco Toito RA: 10438660
+// Nome: Guilherme Longo RA: 10736785
+// Nome: Helen Teixeira RA: 10742524
 
 import java.io.File;
 import java.io.IOException;
